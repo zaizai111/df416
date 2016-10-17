@@ -220,6 +220,53 @@ void MainWindow::recalculateResult()
     //showResult->setFont(QFont( "Timers" , 18 ,  QFont::Bold));
 }
 
+void MainWindow::changeDisplay(std::vector<cv::Mat>& image_gauss,std::vector<cv::Mat>& image_lbp1,std::vector<cv::Mat>& image_lbp2)
+{
+    QImage *im_gauss, *im_lbp1, *im_lbp2;
+
+    //sourceImg=cv::imread(fileName.toStdString());
+    //image->load(fileName);
+    //QImage temp=QtOcv::mat2Image(sourceImg);
+    //cv::imshow("source img",sourceImg);
+    //cv::waitKey(0);
+    //image=&temp;
+
+    // Scale the image to given size
+
+    for(int i=0;i<image_gauss.size();i++){
+        QImage temp_gauss=QtOcv::mat2Image(image_gauss[i]);
+
+        im_gauss=&temp_gauss;
+
+        if(im_gauss == NULL)
+        {
+            std::cout << "gauss is null" << std::endl;
+        }else{
+            std::cout << "gauss not null" << std::endl;
+        }
+
+        *im_gauss = im_gauss->scaled(resultSize, Qt::KeepAspectRatio);
+
+        QImage fixedImage(resultSize, QImage::Format_ARGB32_Premultiplied);
+        QPainter painter(&fixedImage);
+        painter.setCompositionMode(QPainter::CompositionMode_Source);
+        painter.fillRect(fixedImage.rect(), Qt::transparent);
+        painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
+        painter.drawImage(imagePos(*im_gauss), *im_gauss);
+        painter.end();
+        gaussButton->setIcon(QPixmap::fromImage(fixedImage));
+
+        std::cout << "display" << std::endl;
+
+        cv::waitKey(0);
+
+
+    }
+
+
+
+}
+
 
 
 

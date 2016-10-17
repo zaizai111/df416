@@ -84,7 +84,7 @@ void CancerPredict::readTrainSample(const std::vector<std::string>& img_path,dou
         cv::imshow("scala Img",images[ii]);
         cv::imshow("lbpImgs1 Img",lbpImgs1[ii]);
         cv::imshow("lbpImgs2 Img",lbpImgs2[ii]);
-        //cv::waitKey(0);
+        cv::waitKey(0);
     }
     /*********************   test debug    ***********/
 #endif
@@ -230,10 +230,16 @@ double* CancerPredict::predictSample(cv::Mat img, svm_model* model) {
     std::vector<cv::Mat> images,lbpImgs1;
     std::vector<cv::Mat> lbpImgs2;
     mLBP.getLBPScalaVectorDebug(img, feature,images,lbpImgs1,lbpImgs2);
+
+    mainWin.changeDisplay(images, lbpImgs1, lbpImgs2);
+
     for(int i=0;i<images.size();i++){
         cv::imshow("scala Img",images[i]);
         cv::imshow("lbpImgs1 Img",lbpImgs1[i]);
         cv::imshow("lbpImgs2 Img",lbpImgs2[i]);
+
+        //mainWin.changeDisplay(images[i], lbpImgs1[i], lbpImgs2[i]);
+
         cv::waitKey(0);
     }
     /*********************   test debug    ***********/

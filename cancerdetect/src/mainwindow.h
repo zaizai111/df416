@@ -24,6 +24,9 @@ public:
     MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+    void changeDisplay(std::vector<cv::Mat>& image_gauss,std::vector<cv::Mat>& image_lbp1,std::vector<cv::Mat>& image_lbp2);
+
+
 private:
     void chooseImage(const QString &title, QImage *image);
     void loadImage(const QString &fileName, QImage *image, QToolButton *button);

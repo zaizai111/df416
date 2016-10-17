@@ -8,14 +8,17 @@
 #include <fstream>
 #include "svm.h"
 #include "LBP.h"
+#include "mainwindow.h"
+
 class CancerPredict{
 private:
     LBP mLBP;
+    MainWindow mainWin;
     void readImagePaths(std::string txtPathFile,std::vector<std::string>& imgPaths);
     void readTrainSample(const std::vector<std::string>& img_path,double *y,double flag,svm_node **pnodes,int cur);
 public:
     CancerPredict(){
-        mLBP=LBP();
+        mLBP = LBP();
     };
     ~CancerPredict(){};
 //    void trainModel(const char* pos_txt_file,const char* neg_txt_file,const char* model_file);
