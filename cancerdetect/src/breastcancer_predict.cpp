@@ -231,17 +231,30 @@ double* CancerPredict::predictSample(cv::Mat img, svm_model* model) {
     std::vector<cv::Mat> lbpImgs2;
     mLBP.getLBPScalaVectorDebug(img, feature,images,lbpImgs1,lbpImgs2);
 
-    mainWin.changeDisplay(images, lbpImgs1, lbpImgs2);
-
     for(int i=0;i<images.size();i++){
-        cv::imshow("scala Img",images[i]);
-        cv::imshow("lbpImgs1 Img",lbpImgs1[i]);
-        cv::imshow("lbpImgs2 Img",lbpImgs2[i]);
+        QString gauss_str = "/home/xuguo/projects_test/cancerdetect/process/gauss_" ;
+        gauss_str = gauss_str + QString("%1").arg(i, 0, 10) + ".jpg";
 
-        //mainWin.changeDisplay(images[i], lbpImgs1[i], lbpImgs2[i]);
+        QString lbp_str = "/home/xuguo/projects_test/cancerdetect/process/lbp_" ;
+        lbp_str = lbp_str + QString("%1").arg(i, 0, 10) + ".jpg";
 
-        cv::waitKey(0);
+        QString lbpmap_str = "/home/xuguo/projects_test/cancerdetect/process/lbpmap_" ;
+        lbpmap_str = lbpmap_str + QString("%1").arg(i, 0, 10) + ".jpg";
+
+        //std::cout<<str.toStdString()<<std::endl;
+
+        //cv::imshow("scala Img", images[i]);
+        cv::imwrite(gauss_str.toStdString(), images[i]);
+
+        //cv::imshow("lbpImgs1 Img",lbpImgs1[i]);
+        cv::imwrite(lbp_str.toStdString(), lbpImgs1[i]);
+
+        //cv::imshow("lbpImgs2 Img",lbpImgs2[i]);
+        cv::imwrite(lbpmap_str.toStdString(), lbpImgs2[i]);
+
+        //cv::waitKey(0);
     }
+
     /*********************   test debug    ***********/
 #endif
 
@@ -251,12 +264,32 @@ double* CancerPredict::predictSample(cv::Mat img, svm_model* model) {
     x[feature.size()].index=-1;
     copyFeatureToNode(feature,x);
     //double predict_label=svm_predict(model,x);
-    double prob_estimates[2];
+    double prob_estimates[2];   //prob_estimates[0] is good
+    double diff;
+
 
     double predict_label=svm_predict_probability(model,x,prob_estimates);
 
-    if(fabs(prob_estimates[0]-prob_estimates[1])<0.15){
-        predict_label=0;
+//    std::cout << "prob_estimates[0]" << prob_estimates[0] << std::endl;
+//    std::cout << "prob_estimates[1]" << prob_estimates[1] << std::endl;
+
+    if(fabs(prob_estimates[0] - prob_estimates[1]) < 0.15){
+        predict_label = 0;
+
+        if(prob_estimates[1] > prob_estimates[0]){
+            diff = prob_estimates[1] - prob_estimates[0];
+            diff = diff / 0.15;
+
+            std::cout << diff << std::endl;
+
+            if(diff > 0.2 && diff <= 0.1){
+                predict_label = 2;
+            }else if(diff > 0.1 && diff <= 0.5){
+                predict_label = 3;
+            }else if(diff > 0.5 && diff <= 0.95){
+                predict_label = 4;
+            }
+        }
     }
 
     double* predict_result = new double[3];

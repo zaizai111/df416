@@ -43,6 +43,14 @@ MainWindow::MainWindow(QWidget *parent):QWidget(parent)
     LBPLabel_1 = new QLabel(tr("LBP特征图:"));
     LBPLabel_2 = new QLabel(tr("LBP映射图:"));
 
+//    testLabel = new QLabel(this);
+//    testLabel->resize(resultSize);
+//    testLabel->setScaledContents(true);
+
+//    QPixmap pixmap2;
+//    pixmap2.load("/home/xuguo/projects/cancerdetect/resource/dabai.png");
+//    testLabel->setPixmap(pixmap2);
+
     palette.setColor(QPalette::WindowText,Qt::white);
     sourceLabel->setPalette(palette);
     gaussLabel->setPalette(palette);
@@ -54,10 +62,15 @@ MainWindow::MainWindow(QWidget *parent):QWidget(parent)
 
     chooseButton = new QPushButton(tr("选择图片"));
     chooseButton->setEnabled(true);
-//    chooseButton->setStyleSheet("QPushButton{color:blue；background:white}");
 
     showResult = new QTextEdit;
     showResult->setReadOnly(true);
+
+//   timer = new QTimer(this);
+//    timer->setInterval(10);
+//    timer->start();
+//   connect(timer, SIGNAL(timeout()), this, SLOT(changeDisplay()));
+
 
 //    connect(sourceButton, SIGNAL(clicked()), this, SLOT(chooseSource()));
     connect(chooseButton, SIGNAL(clicked()), this, SLOT(chooseSource()));
@@ -81,7 +94,7 @@ MainWindow::MainWindow(QWidget *parent):QWidget(parent)
     setLayout(mainLayout);
 //    setWindowTitle(tr("breastcancer predict"));
     setWindowTitle(tr("乳腺癌的预诊断"));
-    setMaximumSize(QSize(QApplication::desktop()->width(),QApplication::desktop()->height()));
+//    setMaximumSize(QSize(QApplication::desktop()->width(),QApplication::desktop()->height()));
 
 }
 
@@ -171,37 +184,127 @@ void MainWindow::recalculateResult()
     //cv::waitKey(100);
     showResult->setFont(QFont( "Timers" , 18 ,  QFont::Bold));
     //CancerPredictGlcm* mcp;
-    //mcp=new CancerPredictGlcm(store_param);
+    //mcp = new CancerPredictGlcm(store_param);
     CancerPredict mcp;
-    //cv::Mat img=QImage2cvMat(sourceImage);
-    cv::Mat img=sourceImg;
+    //cv::Mat img = QImage2cvMat(sourceImage);
+    cv::Mat img = sourceImg;
     //cv::imshow("fdfdfd",img);
     //cv::waitKey(10);
-    svm_model* model=svm_load_model(mp);
+    svm_model* model = svm_load_model(mp);
     showResult->setText(tr("load model success!\n"));
     double* result = new double[3];
     result = mcp.predictSample(img,model);
 
+    QIcon gauss_icon, lbp_icon, lbpmap_icon;
+
+    for(int i = 0; i < 7; i++)
+    {
+        QString str1 = "/home/xuguo/projects_test/cancerdetect/process/gauss_";
+        str1 = str1 + QString::number(i, 7) + QString(".jpg");
+
+        QString str2 = "/home/xuguo/projects_test/cancerdetect/process/lbp_";
+        str2 = str2 + QString::number(i, 7) + QString(".jpg");
+
+        QString str3 = "/home/xuguo/projects_test/cancerdetect/process/lbpmap_";
+        str3 = str3 + QString::number(i, 7) + QString(".jpg");
+
+        gauss_icon.addFile(str1);
+        gaussButton->setIcon(gauss_icon);
+
+        lbp_icon.addFile(str2);
+        LBPButton_1->setIcon(lbp_icon);
+
+        lbpmap_icon.addFile(str3);
+        LBPButton_2->setIcon(lbpmap_icon);
+
+        sleep(1500);
+    }
+
     std::cout << "The result is:" << result[2] << std::endl;
 
-//    char str[10]={0};
-//   sprintf(str,"%lf",result);
-//    printf("\n%s\n",str);
-    QString res;
-    if(result[2]<0){
-        res=QString("识别结果:")+"恶性"+"\n";
-    }
-    else if(result[2]=0){
-        res=QString("识别结果:")+"拒识"+"\n";
-    }
-    else{
-        res=QString("识别结果:")+"良性"+"\n";
+    QString res, ref;
+
+    switch(int(result[2])){
+    case -1:
+        res = QString("识别结果:") + "恶性" + "\n";
+        ref = "无";
+        break;
+    case 0:
+        res = QString("识别结果:") + "拒识" + "\n";
+        ref = "无";
+        break;
+    case 1:
+        res = QString("识别结果:") + "良性" + "\n";
+        ref = "无";
+        break;
+    case 2:
+        res = QString("识别结果:") + "拒识" + "\n";
+        ref = "A级(低度可疑恶性)";
+        break;
+    case 3:
+        res = QString("识别结果:") + "拒识" + "\n";
+        ref = "B级(中度可疑恶性)";
+        break;
+    case 4:
+        res = QString("识别结果:") + "拒识" + "\n";
+        ref = "C级(高度可疑恶性)";
+        break;
+    default: std::cout << "Something was wrong!" << std::endl;
+        break;
     }
 
-    //res+="model info:\n";
-    //svm_model* model=svm_load_model(mp);
-    //svm_parameter param=model->param;
+    res += "良性概率:" + QString("%1").arg(result[0], 0, 'g', 5) + "\n";
+    res += "恶性概率:" + QString("%1").arg(result[1], 0, 'g', 5) + "\n";
+    res += "拒识风险等级:\n" + ref + "\n";
+
+//    int svm_type;
+//    int kernel_type;
+//    int degree;	/* for poly */
+//    double gamma;	/* for poly/rbf/sigmoid */
+//    double coef0;	/* for poly/sigmoid */
+
+//    /* these are for training only */
+//    double cache_size; /* in MB */
+//    double eps;	/* stopping criteria */
+//    double C;	/* for C_SVC, EPSILON_SVR and NU_SVR */
+//    int nr_weight;		/* for C_SVC */
+//    int *weight_label;	/* for C_SVC */
+//    double* weight;		/* for C_SVC */
+//    double nu;	/* for NU_SVC, ONE_CLASS, and NU_SVR */
+//    double p;	/* for EPSILON_SVR */
+//    int shrinking;	/* use the shrinking heuristics */
+//    int probability; /* do probability estimates */
+
+
+
+    res += "model info:\n";
+    //svm_model* model = svm_load_model(mp);
+    svm_parameter param = model->param;
+
+    std::cout << "param.svm_type:" << param.svm_type << std::endl;
+    std::cout << "param.kernel_type:" << param.kernel_type << std::endl;
+    std::cout << "param.degree:" << param.degree << std::endl;
+    std::cout << "param.gamma:" << param.gamma << std::endl;
+    std::cout << "param.coef0:" << param.coef0 << std::endl;
+    std::cout << "param.nu:" << param.nu << std::endl;
+    std::cout << "param.cache_size:" << param.cache_size << std::endl;
+    std::cout << "param.C:" << param.C << std::endl;
+    std::cout << "param.eps:" << param.eps << std::endl;
+    std::cout << "param.p:" << param.p << std::endl;
+
+
     // default values
+    res += "svm_type:" + QString("%1").arg(param.svm_type, 0, 10) + "\n";
+    res += "kernel_type:" + QString("%1").arg(param.kernel_type, 0, 10) + "\n";
+    res += "degree:" + QString("%1").arg(param.degree, 0, 10) + "\n";
+    res += "gamma:" + QString("%1").arg(param.gamma, 0, 'g', 3) + "\n";
+    res += "coef0:" + QString("%1").arg(param.coef0, 0, 'g', 3) + "\n";
+    res += "nu:" + QString("%1").arg(param.nu, 0, 'g', 3) + "\n";
+    res += "cache_size:" + QString("%1").arg(param.cache_size, 0, 'g', 3) + "\n";
+    res += "C:" + QString("%1").arg(param.C, 0, 'g', 3) + "\n";
+    res += "eps:" + QString("%1").arg(param.eps, 0, 'g', 3) + "\n";
+    res += "p:" + QString("%1").arg(param.p, 0, 'g', 3) + "\n";
+
 //    res+="svm_type:C_SVC\n";
 //    res+="kernel_type = LINEAR\n";
 //    res+="degree = 3\n";
@@ -212,59 +315,112 @@ void MainWindow::recalculateResult()
 //    res+="C = 5\n";
 //    res+="eps = 1e-3\n";
 //    res+="p = 0.1\n";
-    res+="良性概率:" + QString("%1").arg( result[0], 0, 'g', 5 ) + "\n";
-    res+="恶性概率:" + QString("%1").arg( result[1], 0, 'g', 5 ) + "\n";
-    res+="拒识风险等级:0\n";
 
     showResult->setText(res);
     //showResult->setFont(QFont( "Timers" , 18 ,  QFont::Bold));
 }
 
-void MainWindow::changeDisplay(std::vector<cv::Mat>& image_gauss,std::vector<cv::Mat>& image_lbp1,std::vector<cv::Mat>& image_lbp2)
+void MainWindow::sleep(unsigned int msec)
 {
-    QImage *im_gauss, *im_lbp1, *im_lbp2;
+    QTime dieTime = QTime::currentTime().addMSecs(msec);
+    while( QTime::currentTime() < dieTime )
+    {
+        QCoreApplication::processEvents(QEventLoop::AllEvents, 100);
+    }
+}
 
-    //sourceImg=cv::imread(fileName.toStdString());
-    //image->load(fileName);
-    //QImage temp=QtOcv::mat2Image(sourceImg);
-    //cv::imshow("source img",sourceImg);
-    //cv::waitKey(0);
-    //image=&temp;
+
+void MainWindow::changeDisplay()
+{
+//    QImage *im_gauss, *im_lbp1, *im_lbp2;
+//    QImage im_gauss;
 
     // Scale the image to given size
 
-    for(int i=0;i<image_gauss.size();i++){
-        QImage temp_gauss=QtOcv::mat2Image(image_gauss[i]);
 
-        im_gauss=&temp_gauss;
+//        QImage temp_gauss=QtOcv::mat2Image(image_gauss[i]);
 
-        if(im_gauss == NULL)
-        {
-            std::cout << "gauss is null" << std::endl;
-        }else{
-            std::cout << "gauss not null" << std::endl;
-        }
+//        im_gauss=&temp_gauss;
 
-        *im_gauss = im_gauss->scaled(resultSize, Qt::KeepAspectRatio);
+//        if(im_gauss == NULL)
+//        {
+//            std::cout << "gauss is null" << std::endl;
+//        }else{
+//            std::cout << "gauss not null" << std::endl;
+//            std::cout << image_gauss[i] << std::endl;
+//            std::cout << "temp_gauss" << std::endl;
+//            //std::cout << temp_gauss << std::endl;
+//            std::cout << "im_gauss" << std::endl;
+//            std::cout << im_gauss << std::endl;
+//        }
 
-        QImage fixedImage(resultSize, QImage::Format_ARGB32_Premultiplied);
-        QPainter painter(&fixedImage);
-        painter.setCompositionMode(QPainter::CompositionMode_Source);
-        painter.fillRect(fixedImage.rect(), Qt::transparent);
-        painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
-        painter.drawImage(imagePos(*im_gauss), *im_gauss);
-        painter.end();
-        gaussButton->setIcon(QPixmap::fromImage(fixedImage));
+//        *im_gauss = im_gauss->scaled(resultSize, Qt::KeepAspectRatio);
+
+//        QImage gauss_fixedImage(resultSize, QImage::Format_ARGB32_Premultiplied);
+
+//        QPainter gauss_painter(&gauss_fixedImage);
+//        gauss_painter.setCompositionMode(QPainter::CompositionMode_Source);
+//        gauss_painter.fillRect(gauss_fixedImage.rect(), Qt::transparent);
+//        gauss_painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
+//        gauss_painter.drawImage(imagePos(*im_gauss), *im_gauss);
+//        gauss_painter.end();
+//        gaussButton->setIcon(QPixmap::fromImage(gauss_fixedImage));
+
+//        testLabel->setPixmap(QPixmap::fromImage(gauss_fixedImage));
+//        testLabel->show();
+
+
+
+//        if(!image_gauss[i].data)
+//        {
+//            QMessageBox msgBox;
+//            msgBox.setText(tr("image data is null"));
+//            msgBox.exec();
+//        }else{
+//            cv::cvtColor(image_gauss[i],image_gauss[i],CV_BGR2RGB);
+//            im_gauss = QImage((const unsigned char*)(image_gauss[i].data),image_gauss[i].cols,image_gauss[i].rows,QImage::Format_RGB888);
+//            testLabel->clear();
+//            testLabel->setPixmap(QPixmap::fromImage(im_gauss));
+//            //testLabel->resize(ui->label->pixmap()->size());
+//        }
+
+
+//          cv::Mat rgb;
+//          QImage scaledImg;
+
+//          if(image_gauss.channels() == 3)    // RGB image
+//          {
+//              cvtColor(image_gauss,rgb,CV_BGR2RGB);
+//              im_gauss = QImage((const uchar*)(rgb.data),  //(const unsigned char*)
+//                           rgb.cols,rgb.rows,
+//                           rgb.cols*rgb.channels(),   //解决Mat图像与QImage图像不对齐问题
+//                           QImage::Format_RGB888);
+//             scaledImg=im_gauss.scaled(testLabel->size(),Qt::IgnoreAspectRatio);
+//             std::cout << "1" << std::endl;
+
+//          }else {                     // gray imag
+//              im_gauss = QImage((const uchar*)(image_gauss.data),
+//                           image_gauss.cols,image_gauss.rows,
+//                           image_gauss.cols*image_gauss.channels(),    //解决Mat图像与QImage图像不对齐问题
+//                           QImage::Format_Indexed8);
+//              scaledImg=im_gauss.scaled(testLabel->size(),Qt::IgnoreAspectRatio);
+//              std::cout << "2" << std::endl;
+//          }
+//          testLabel->setPixmap(QPixmap::fromImage(im_gauss));
+//          testLabel->show();
+
+//        QPixmap pixmap3;
+//        std::cout << "1" << std::endl;
+//        pixmap3.load("/home/xuguo/projects_test/cancerdetect/process/gauss.jpg");
+//        std::cout << "2" << std::endl;
+//        testLabel->setPixmap(pixmap3);
+
+//        timer->stop();
+//        QIcon icon1;
+//        icon1.addFile(tr("/home/xuguo/projects_test/cancerdetect/process/gauss.jpg"));
+//        gaussButton->setIcon(icon1);
 
         std::cout << "display" << std::endl;
-
-        cv::waitKey(0);
-
-
-    }
-
-
-
 }
 
 

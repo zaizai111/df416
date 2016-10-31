@@ -13,7 +13,6 @@
 class CancerPredict{
 private:
     LBP mLBP;
-    MainWindow mainWin;
     void readImagePaths(std::string txtPathFile,std::vector<std::string>& imgPaths);
     void readTrainSample(const std::vector<std::string>& img_path,double *y,double flag,svm_node **pnodes,int cur);
 public:
