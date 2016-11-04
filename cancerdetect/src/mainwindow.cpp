@@ -7,6 +7,7 @@
 
 static const QSize resultSize(480, 360);
 //static const QSize resultSize(960, 720);
+extern double sigmas[7];
 
 MainWindow::MainWindow(QWidget *parent):QWidget(parent)
 {
@@ -28,20 +29,20 @@ MainWindow::MainWindow(QWidget *parent):QWidget(parent)
     LBPButton_1 = new QToolButton;
     LBPButton_1->setIconSize(resultSize);
 
-    LBPButton_2 = new QToolButton;
-    LBPButton_2->setIconSize(resultSize);
+//    LBPButton_2 = new QToolButton;
+//    LBPButton_2->setIconSize(resultSize);
 
     QIcon icon;
     icon.addFile(tr("/home/xuguo/projects/cancerdetect/resource/dabai.png"));
     sourceButton->setIcon(icon);
     gaussButton->setIcon(icon);
     LBPButton_1->setIcon(icon);
-    LBPButton_2->setIcon(icon);
+//    LBPButton_2->setIcon(icon);
 
     sourceLabel = new QLabel(tr("原图:"));
     gaussLabel = new QLabel(tr("高斯模糊图:"));
     LBPLabel_1 = new QLabel(tr("LBP特征图:"));
-    LBPLabel_2 = new QLabel(tr("LBP映射图:"));
+    LBPLabel_2 = new QLabel(tr("高斯模糊尺度:"));
 
 //    testLabel = new QLabel(this);
 //    testLabel->resize(resultSize);
@@ -66,6 +67,9 @@ MainWindow::MainWindow(QWidget *parent):QWidget(parent)
     showResult = new QTextEdit;
     showResult->setReadOnly(true);
 
+    gaussResult = new QTextEdit;
+    gaussResult->setReadOnly(true);
+
 //   timer = new QTimer(this);
 //    timer->setInterval(10);
 //    timer->start();
@@ -85,7 +89,7 @@ MainWindow::MainWindow(QWidget *parent):QWidget(parent)
     mainLayout->addWidget(sourceButton, 1, 0, 3, 1);
     mainLayout->addWidget(gaussButton, 1, 2, 3, 1);
     mainLayout->addWidget(LBPButton_1, 5, 0, 3, 1);
-    mainLayout->addWidget(LBPButton_2, 5, 2, 3, 1);
+    mainLayout->addWidget(gaussResult, 5, 2, 3, 1);
     
     mainLayout->addWidget(calculateButton, 1, 4, 1, 1);
     mainLayout->addWidget(chooseButton, 9, 0, 1, 3);
@@ -95,6 +99,8 @@ MainWindow::MainWindow(QWidget *parent):QWidget(parent)
 //    setWindowTitle(tr("breastcancer predict"));
     setWindowTitle(tr("乳腺癌的预诊断"));
 //    setMaximumSize(QSize(QApplication::desktop()->width(),QApplication::desktop()->height()));
+
+    std::cout << "The mainwindow" << std::endl;
 
 }
 
@@ -179,10 +185,14 @@ cv::Mat QImage2cvMat(QImage image)
 void MainWindow::recalculateResult()
 {
     showResult->clear();
+    gaussResult->clear();
 
     showResult->setText(tr("doing...\n"));
     //cv::waitKey(100);
-    showResult->setFont(QFont( "Timers" , 18 ,  QFont::Bold));
+    showResult->setFont(QFont("Timers", 18, QFont::Bold));
+    gaussResult->setFont(QFont("Timers", 18, QFont::Bold));
+    showResult->setTextColor(Qt::red);
+    gaussResult->setTextColor(Qt::red);
     //CancerPredictGlcm* mcp;
     //mcp = new CancerPredictGlcm(store_param);
     CancerPredict mcp;
@@ -191,11 +201,13 @@ void MainWindow::recalculateResult()
     //cv::imshow("fdfdfd",img);
     //cv::waitKey(10);
     svm_model* model = svm_load_model(mp);
-    showResult->setText(tr("load model success!\n"));
+    showResult->setText(tr("加载模型成功!\n"));
     double* result = new double[3];
     result = mcp.predictSample(img,model);
 
     QIcon gauss_icon, lbp_icon, lbpmap_icon;
+    QString res, ref;
+    res = QString("采用的高斯模糊尺度如下:\n");
 
     for(int i = 0; i < 7; i++)
     {
@@ -205,8 +217,12 @@ void MainWindow::recalculateResult()
         QString str2 = "/home/xuguo/projects_test/cancerdetect/process/lbp_";
         str2 = str2 + QString::number(i, 7) + QString(".jpg");
 
-        QString str3 = "/home/xuguo/projects_test/cancerdetect/process/lbpmap_";
-        str3 = str3 + QString::number(i, 7) + QString(".jpg");
+//        QString str3 = "/home/xuguo/projects_test/cancerdetect/process/lbpmap_";
+//        str3 = str3 + QString::number(i, 7) + QString(".jpg");
+
+        res += "尺度" + QString("%1").arg(i+1, 0, 10) + ": " + QString("%1").arg(sigmas[i], 0, 'g', 8) + "\n";
+        gaussResult->setText(res);
+        //std::cout << "The sigmas is:" << sigmas[i] << std::endl;
 
         gauss_icon.addFile(str1);
         gaussButton->setIcon(gauss_icon);
@@ -214,15 +230,13 @@ void MainWindow::recalculateResult()
         lbp_icon.addFile(str2);
         LBPButton_1->setIcon(lbp_icon);
 
-        lbpmap_icon.addFile(str3);
-        LBPButton_2->setIcon(lbpmap_icon);
+//        lbpmap_icon.addFile(str3);
+//        LBPButton_2->setIcon(lbpmap_icon);
 
         sleep(1500);
     }
 
     std::cout << "The result is:" << result[2] << std::endl;
-
-    QString res, ref;
 
     switch(int(result[2])){
     case -1:
@@ -257,67 +271,75 @@ void MainWindow::recalculateResult()
     res += "恶性概率:" + QString("%1").arg(result[1], 0, 'g', 5) + "\n";
     res += "拒识风险等级:\n" + ref + "\n";
 
-//    int svm_type;
-//    int kernel_type;
-//    int degree;	/* for poly */
-//    double gamma;	/* for poly/rbf/sigmoid */
-//    double coef0;	/* for poly/sigmoid */
-
-//    /* these are for training only */
-//    double cache_size; /* in MB */
-//    double eps;	/* stopping criteria */
-//    double C;	/* for C_SVC, EPSILON_SVR and NU_SVR */
-//    int nr_weight;		/* for C_SVC */
-//    int *weight_label;	/* for C_SVC */
-//    double* weight;		/* for C_SVC */
-//    double nu;	/* for NU_SVC, ONE_CLASS, and NU_SVR */
-//    double p;	/* for EPSILON_SVR */
-//    int shrinking;	/* use the shrinking heuristics */
-//    int probability; /* do probability estimates */
-
-
-
-    res += "model info:\n";
-    //svm_model* model = svm_load_model(mp);
     svm_parameter param = model->param;
 
-    std::cout << "param.svm_type:" << param.svm_type << std::endl;
-    std::cout << "param.kernel_type:" << param.kernel_type << std::endl;
-    std::cout << "param.degree:" << param.degree << std::endl;
-    std::cout << "param.gamma:" << param.gamma << std::endl;
-    std::cout << "param.coef0:" << param.coef0 << std::endl;
-    std::cout << "param.nu:" << param.nu << std::endl;
-    std::cout << "param.cache_size:" << param.cache_size << std::endl;
-    std::cout << "param.C:" << param.C << std::endl;
-    std::cout << "param.eps:" << param.eps << std::endl;
-    std::cout << "param.p:" << param.p << std::endl;
+//    std::cout << "param.svm_type:" << param.svm_type << std::endl;
+//    std::cout << "param.kernel_type:" << param.kernel_type << std::endl;
+//    std::cout << "param.degree:" << param.degree << std::endl;
+//    std::cout << "param.gamma:" << param.gamma << std::endl;
+//    std::cout << "param.coef0:" << param.coef0 << std::endl;
+//    std::cout << "param.nu:" << param.nu << std::endl;
+//    std::cout << "param.cache_size:" << param.cache_size << std::endl;
+//    std::cout << "param.C:" << param.C << std::endl;
+//    std::cout << "param.eps:" << param.eps << std::endl;
+//    std::cout << "param.p:" << param.p << std::endl;
 
+
+    switch(param.svm_type){
+    case 0:
+        res += QString("SVM问题类型:多类别识别问题(C_SVC)") + "\n";
+        break;
+    case 1:
+        res += QString("SVM问题类型:多类别识别问题(NU_SVC)") + "\n";
+        break;
+    case 2:
+        res += QString("SVM问题类型:两类别识别问题(ONE_CLASS)") + "\n";
+        break;
+    case 3:
+        res += QString("SVM问题类型:回归分析(EPSILON_SVR)") + "\n";
+        break;
+    case 4:
+        res += QString("SVM问题类型:回归分析(NU_SVR)") + "\n";
+        break;
+    default:
+        std::cout << "Something was wrong!" << std::endl;
+        break;
+    }
+
+    switch(param.kernel_type){
+    case 0:
+        res += QString("核函数类型:线性核函数") + "\n";
+        break;
+    case 1:
+        res += QString("核函数类型:多项式核函数") + "\n";
+        break;
+    case 2:
+        res += QString("核函数类型:高斯核函数") + "\n";
+        break;
+    case 3:
+        res += QString("核函数类型:Sigmoid函数") + "\n";
+        break;
+    case 4:
+        res += QString("核函数类型:自定义核函数") + "\n";
+        break;
+    default:
+        std::cout << "Something was wrong!" << std::endl;
+        break;
+    }
 
     // default values
-    res += "svm_type:" + QString("%1").arg(param.svm_type, 0, 10) + "\n";
-    res += "kernel_type:" + QString("%1").arg(param.kernel_type, 0, 10) + "\n";
-    res += "degree:" + QString("%1").arg(param.degree, 0, 10) + "\n";
-    res += "gamma:" + QString("%1").arg(param.gamma, 0, 'g', 3) + "\n";
-    res += "coef0:" + QString("%1").arg(param.coef0, 0, 'g', 3) + "\n";
-    res += "nu:" + QString("%1").arg(param.nu, 0, 'g', 3) + "\n";
-    res += "cache_size:" + QString("%1").arg(param.cache_size, 0, 'g', 3) + "\n";
-    res += "C:" + QString("%1").arg(param.C, 0, 'g', 3) + "\n";
-    res += "eps:" + QString("%1").arg(param.eps, 0, 'g', 3) + "\n";
-    res += "p:" + QString("%1").arg(param.p, 0, 'g', 3) + "\n";
-
-//    res+="svm_type:C_SVC\n";
-//    res+="kernel_type = LINEAR\n";
-//    res+="degree = 3\n";
-//    res+="gamma = 1.0/1188\n";
-//    res+="coef0 = 0\n";
-//    res+="nu = 0.5\n";
-//    res+="cache_size = 100\n";
-//    res+="C = 5\n";
-//    res+="eps = 1e-3\n";
-//    res+="p = 0.1\n";
+    //res += "svm_type:" + QString("%1").arg(param.svm_type, 0, 10) + "\n";
+    //res += "kernel_type:" + QString("%1").arg(param.kernel_type, 0, 10) + "\n";
+    //res += "degree:" + QString("%1").arg(param.degree, 0, 10) + "\n";
+    //res += "gamma:" + QString("%1").arg(param.gamma, 0, 'g', 3) + "\n";
+    //res += "coef0:" + QString("%1").arg(param.coef0, 0, 'g', 3) + "\n";
+    //res += "nu:" + QString("%1").arg(param.nu, 0, 'g', 3) + "\n";
+    //res += "cache_size:" + QString("%1").arg(param.cache_size, 0, 'g', 3) + "\n";
+    res += "惩罚系数: 5\n";
+    //res += "eps:" + QString("%1").arg(param.eps, 0, 'g', 3) + "\n";
+    //res += "p:" + QString("%1").arg(param.p, 0, 'g', 3) + "\n";
 
     showResult->setText(res);
-    //showResult->setFont(QFont( "Timers" , 18 ,  QFont::Bold));
 }
 
 void MainWindow::sleep(unsigned int msec)

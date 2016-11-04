@@ -74,7 +74,7 @@ void CancerPredict::readTrainSample(const std::vector<std::string>& img_path,dou
         cv::Mat img = cv::imread(img_path[i]);
         std::vector<float> feature;
 
-#define myDebug
+//#define myDebug
 #ifdef myDebug
         /*********************   test debug    ***********/
     std::vector<cv::Mat> images,lbpImgs1;
@@ -87,9 +87,9 @@ void CancerPredict::readTrainSample(const std::vector<std::string>& img_path,dou
         cv::waitKey(0);
     }
     /*********************   test debug    ***********/
+#else
+    mLBP.getLBPScalaVector(img, feature);
 #endif
-
-        //mLBP.getLBPScalaVector(img, feature);
         //std::cout<<"mLBP.getLBPVector(img, feature) success!"<<std::endl;
         pnodes[cur+i] = new svm_node[(int)feature.size() + 1];
         copyFeatureToNode(feature, pnodes[cur+i]);
@@ -133,7 +133,7 @@ void CancerPredict::trainModel(const char *pos_txt_file, const char *neg_txt_fil
     param.nr_weight = 0;
     param.weight_label = NULL;
     param.weight = NULL;
-    std::cout << "param is done." << std::endl;
+    std::cout << "2016-11-4:param is done." << std::endl;
 
     //do_cross_validation(mproblem,param,nsamples);
 
@@ -270,8 +270,9 @@ double* CancerPredict::predictSample(cv::Mat img, svm_model* model) {
 
     double predict_label=svm_predict_probability(model,x,prob_estimates);
 
-//    std::cout << "prob_estimates[0]" << prob_estimates[0] << std::endl;
-//    std::cout << "prob_estimates[1]" << prob_estimates[1] << std::endl;
+    //std::cout << "prob_estimates[0]:" << prob_estimates[0] << std::endl;
+    //std::cout << "prob_estimates[1]:" << prob_estimates[1] << std::endl;
+    //std::cout << "label:" << predict_label << std::endl;
 
     if(fabs(prob_estimates[0] - prob_estimates[1]) < 0.15){
         predict_label = 0;

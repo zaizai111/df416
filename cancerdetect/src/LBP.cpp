@@ -1,4 +1,4 @@
-//
+﻿//
 // Created by dang on 16-8-7.
 //
 
@@ -7,7 +7,14 @@
 #include "Canny.h"
 
 #define scala 7
-double sigmas[scala]={0.5,1,1.5,2,3,3.5,4};
+
+#define gold (1/0.618)
+double myexp(double x,int a){
+    if(a==0)return 1;
+    return x*myexp(x,a-1);
+}
+double sigmas[scala]={1,myexp(gold,1),myexp(gold,2),myexp(gold,3),myexp(gold,4),myexp(gold,5),myexp(gold,6)};
+
 
 void LBP::getLBPImage(cv::Mat &src, cv::Mat &lbp) {
     cv::Mat grayImg;

@@ -53,6 +53,7 @@ private:
 
     QImage sourceImage;
     QTextEdit *showResult;
+    QTextEdit *gaussResult;
 
     cv::Mat sourceImg;
 };
