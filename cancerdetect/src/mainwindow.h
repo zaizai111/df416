@@ -21,15 +21,12 @@ class MainWindow : public QWidget
 private slots:
     void chooseSource();
     void recalculateResult();
-    void changeDisplay();
 
 public:
     MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
     QTimer *timer;
-    //void changeDisplay(cv::Mat image_gauss, cv::Mat image_lbp1, cv::Mat image_lbp2);
-    //void changeDisplay();
 
 private:
     void sleep(unsigned int msec);

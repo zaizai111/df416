@@ -326,18 +326,7 @@ void MainWindow::recalculateResult()
         std::cout << "Something was wrong!" << std::endl;
         break;
     }
-
-    // default values
-    //res += "svm_type:" + QString("%1").arg(param.svm_type, 0, 10) + "\n";
-    //res += "kernel_type:" + QString("%1").arg(param.kernel_type, 0, 10) + "\n";
-    //res += "degree:" + QString("%1").arg(param.degree, 0, 10) + "\n";
-    //res += "gamma:" + QString("%1").arg(param.gamma, 0, 'g', 3) + "\n";
-    //res += "coef0:" + QString("%1").arg(param.coef0, 0, 'g', 3) + "\n";
-    //res += "nu:" + QString("%1").arg(param.nu, 0, 'g', 3) + "\n";
-    //res += "cache_size:" + QString("%1").arg(param.cache_size, 0, 'g', 3) + "\n";
     res += "惩罚系数: 5\n";
-    //res += "eps:" + QString("%1").arg(param.eps, 0, 'g', 3) + "\n";
-    //res += "p:" + QString("%1").arg(param.p, 0, 'g', 3) + "\n";
 
     showResult->setText(res);
 }
@@ -352,98 +341,6 @@ void MainWindow::sleep(unsigned int msec)
 }
 
 
-void MainWindow::changeDisplay()
-{
-//    QImage *im_gauss, *im_lbp1, *im_lbp2;
-//    QImage im_gauss;
-
-    // Scale the image to given size
-
-
-//        QImage temp_gauss=QtOcv::mat2Image(image_gauss[i]);
-
-//        im_gauss=&temp_gauss;
-
-//        if(im_gauss == NULL)
-//        {
-//            std::cout << "gauss is null" << std::endl;
-//        }else{
-//            std::cout << "gauss not null" << std::endl;
-//            std::cout << image_gauss[i] << std::endl;
-//            std::cout << "temp_gauss" << std::endl;
-//            //std::cout << temp_gauss << std::endl;
-//            std::cout << "im_gauss" << std::endl;
-//            std::cout << im_gauss << std::endl;
-//        }
-
-//        *im_gauss = im_gauss->scaled(resultSize, Qt::KeepAspectRatio);
-
-//        QImage gauss_fixedImage(resultSize, QImage::Format_ARGB32_Premultiplied);
-
-//        QPainter gauss_painter(&gauss_fixedImage);
-//        gauss_painter.setCompositionMode(QPainter::CompositionMode_Source);
-//        gauss_painter.fillRect(gauss_fixedImage.rect(), Qt::transparent);
-//        gauss_painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
-//        gauss_painter.drawImage(imagePos(*im_gauss), *im_gauss);
-//        gauss_painter.end();
-//        gaussButton->setIcon(QPixmap::fromImage(gauss_fixedImage));
-
-//        testLabel->setPixmap(QPixmap::fromImage(gauss_fixedImage));
-//        testLabel->show();
-
-
-
-//        if(!image_gauss[i].data)
-//        {
-//            QMessageBox msgBox;
-//            msgBox.setText(tr("image data is null"));
-//            msgBox.exec();
-//        }else{
-//            cv::cvtColor(image_gauss[i],image_gauss[i],CV_BGR2RGB);
-//            im_gauss = QImage((const unsigned char*)(image_gauss[i].data),image_gauss[i].cols,image_gauss[i].rows,QImage::Format_RGB888);
-//            testLabel->clear();
-//            testLabel->setPixmap(QPixmap::fromImage(im_gauss));
-//            //testLabel->resize(ui->label->pixmap()->size());
-//        }
-
-
-//          cv::Mat rgb;
-//          QImage scaledImg;
-
-//          if(image_gauss.channels() == 3)    // RGB image
-//          {
-//              cvtColor(image_gauss,rgb,CV_BGR2RGB);
-//              im_gauss = QImage((const uchar*)(rgb.data),  //(const unsigned char*)
-//                           rgb.cols,rgb.rows,
-//                           rgb.cols*rgb.channels(),   //解决Mat图像与QImage图像不对齐问题
-//                           QImage::Format_RGB888);
-//             scaledImg=im_gauss.scaled(testLabel->size(),Qt::IgnoreAspectRatio);
-//             std::cout << "1" << std::endl;
-
-//          }else {                     // gray imag
-//              im_gauss = QImage((const uchar*)(image_gauss.data),
-//                           image_gauss.cols,image_gauss.rows,
-//                           image_gauss.cols*image_gauss.channels(),    //解决Mat图像与QImage图像不对齐问题
-//                           QImage::Format_Indexed8);
-//              scaledImg=im_gauss.scaled(testLabel->size(),Qt::IgnoreAspectRatio);
-//              std::cout << "2" << std::endl;
-//          }
-//          testLabel->setPixmap(QPixmap::fromImage(im_gauss));
-//          testLabel->show();
-
-//        QPixmap pixmap3;
-//        std::cout << "1" << std::endl;
-//        pixmap3.load("/home/xuguo/projects_test/cancerdetect/process/gauss.jpg");
-//        std::cout << "2" << std::endl;
-//        testLabel->setPixmap(pixmap3);
-
-//        timer->stop();
-//        QIcon icon1;
-//        icon1.addFile(tr("/home/xuguo/projects_test/cancerdetect/process/gauss.jpg"));
-//        gaussButton->setIcon(icon1);
-
-        std::cout << "display" << std::endl;
-}
 
 
 

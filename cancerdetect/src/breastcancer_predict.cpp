@@ -171,12 +171,6 @@ void CancerPredict::trainModel(const char *pos_txt_file, const char *neg_txt_fil
 
 }
 
-//double CancerPredict::predictSample(cv::Mat img, const char *model_file) {
-//    svm_model* model=svm_load_model(model_file);
-//    double predict_label=predictSample(img,model);
-//    return predict_label;
-//}
-
 double* CancerPredict::predictSample(cv::Mat img, const char *model_file) {
     svm_model* model=svm_load_model(model_file);
     double *predict_res = new double[3];
@@ -184,43 +178,6 @@ double* CancerPredict::predictSample(cv::Mat img, const char *model_file) {
 
     return predict_res;
 }
-
-
-//double CancerPredict::predictSample(cv::Mat img, svm_model* model) {
-//    std::vector<float> feature;
-
-//#ifdef myDebug
-//    /*********************   test debug    ***********/
-//    std::vector<cv::Mat> images,lbpImgs1;
-//    std::vector<cv::Mat> lbpImgs2;
-//    mLBP.getLBPScalaVectorDebug(img, feature,images,lbpImgs1,lbpImgs2);
-//    for(int i=0;i<images.size();i++){
-//        cv::imshow("scala Img",images[i]);
-//        cv::imshow("lbpImgs1 Img",lbpImgs1[i]);
-//        cv::imshow("lbpImgs2 Img",lbpImgs2[i]);
-//        cv::waitKey(0);
-//    }
-//    /*********************   test debug    ***********/
-//#endif
-//    mLBP.getLBPScalaVector(img, feature);
-
-//    svm_node *x;
-//    x=new svm_node[feature.size()+1];
-//    x[feature.size()].index=-1;
-//    copyFeatureToNode(feature,x);
-//    //double predict_label=svm_predict(model,x);
-//    double prob_estimates[2];
-//    double predict_label=svm_predict_probability(model,x,prob_estimates);
-//    if(fabs(prob_estimates[0]-prob_estimates[1])<0.15){
-//        predict_label=0;
-//    }
-//    //std::cout<<"probability is: "<<prob_estimates[0]<<"  "<<prob_estimates[1]<<" model(label<0,1>):"<<model->label[0]<<" "<<model->label[1]<<std::endl;
-
-//    //svm_free_and_destroy_model(&model);
-//    delete[] x;
-//    feature.clear();
-//    return predict_label;
-//}
 
 double* CancerPredict::predictSample(cv::Mat img, svm_model* model) {
     std::vector<float> feature;
